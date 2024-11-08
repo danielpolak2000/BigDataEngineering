@@ -1,5 +1,12 @@
 apiVersion: v2
 name: crypto-tracker
-version: 0.1.0
 description: A crypto tracker deployed in Kubernetes with Helm
-type: application
+version: 0.1.0
+
+dependencies:
+  - name: spark
+    version: 9.2.12
+    repository: https://charts.bitnami.com/bitnami
+  - name: influxdb
+    version: 6.3.21
+    repository: https://charts.bitnami.com/bitnami

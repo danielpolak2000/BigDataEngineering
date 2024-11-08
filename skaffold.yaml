@@ -1,0 +1,21 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: crypto-tracker
+build:
+  artifacts:
+    - image: spark-job-crypto-tracker
+      context: src/spark-job
+      docker:
+        dockerfile: Dockerfile
+
+deploy:
+  helm:
+    releases:
+      - name: crypto-tracker
+        chartPath: charts/crypto-tracker
+        valuesFiles:
+          - charts/crypto-tracker/values.yaml
+        setValues:
+          sparkJob.image: spark-job-crypto-tracker:latest
+          kafks.bootstrapServers: "my-kafka-cluster-kafka-bootstrap.kafka:9092"

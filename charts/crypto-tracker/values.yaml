@@ -1,0 +1,30 @@
+kafka:
+  replicaCount: 1
+  externalAccess:
+    enabled: true
+  auth:
+    enabled: false
+
+spark:
+  master:
+    webPort: 8080
+  worker:
+    replicas: 1
+    webPort: 8081
+
+influxdb:
+  authEnabled: true
+  adminUser:
+    user: "admin"
+    password: "admin"
+  database: "crypto-tracker"
+  persistence:
+    enabled: true
+    size: "5Gi"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+
+sparkJob:
+  image: "spark-job-crypto-tracker:latest"

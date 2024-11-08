@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-job-deployment
+  labels:
+    app: spark-job
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-job
+  template:
+    metadata:
+      labels:
+        app: spark-job
+    spec:
+      containers:
+        - name: spark-job
+          image: "{{ .Values.sparkJob.image }}"
+          command: ["spark-submit", "--master", "spark://spark-master:7077", "/opt/spark-apps/spark_job.py"]
+          env:
+            - name: INFLUXDB_URL
+              value: "http://influxdb:8086"
+            - name: INFLUXDB_DATABASE
+              value: "{{ .Values.influxdb.database }}"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.kafka.bootstrapServers }}"
