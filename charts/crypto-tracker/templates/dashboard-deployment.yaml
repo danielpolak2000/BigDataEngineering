@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app: crypto-tracker
+    component: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crypto-tracker
+      component: dashboard
+  template:
+    metadata:
+      labels:
+        app: crypto-tracker
+        component: dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: {{ .Values.dashboard.image.repository }}:{{ .Values.dashboard.image.tag }}
+        ports:
+        - containerPort: {{ .Values.dashboard.service.port }}
+        env:
+        - name: INFLUXDB_HOST
+          value: {{ .Values.dashbaord.influxdb.host }}
+        - name: INFLUXDB_PORT
+          value: "{{ .Values.dashbaord.influxdb.port }}"
+        - name: INFLUXDB_DATABASE
+          value: {{ .Values.dashbaord.influxdb.database }}

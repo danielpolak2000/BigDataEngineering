@@ -1,9 +1,13 @@
 apiVersion: v2
 name: crypto-tracker
-description: A crypto tracker deployed in Kubernetes with Helm
+description: A Helm chart for deploying a crypto tracking application on Kubernetes with Kafka, Spark, and InfluxDB
 version: 0.1.0
+appVersion: "1.0"
 
 dependencies:
+  - name: kafka
+    version: 30.1.7
+    repository: https://charts.bitnami.com/bitnami
   - name: spark
     version: 9.2.12
     repository: https://charts.bitnami.com/bitnami

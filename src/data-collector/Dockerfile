@@ -1,5 +1,5 @@
-# Use an official Spark base image
-FROM bitnami/spark:latest
+# Use Python base image
+FROM python:3.9-slim
 
 # Set working directory
 WORKDIR /app
@@ -9,7 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the Python script into the container
-COPY spark_job.py .
+COPY data_collector.py .
 
-# Set Spark entry point
-ENTRYPOINT ["spark-submit", "/app/spark_job.py"]
+# Set the entry point for the container
+ENTRYPOINT ["python", "data_collector.py"]

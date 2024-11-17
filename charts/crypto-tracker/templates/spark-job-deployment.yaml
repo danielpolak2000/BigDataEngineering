@@ -1,27 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spark-job-deployment
+  name: spark-job
   labels:
-    app: spark-job
+    app: crypto-tracker
+    component: spark-job
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: spark-job
+      app: crypto-tracker
+      component: spark-job
   template:
     metadata:
       labels:
-        app: spark-job
+        app: crypto-tracker
+        component: spark-job
     spec:
       containers:
-        - name: spark-job
-          image: "{{ .Values.sparkJob.image }}"
-          command: ["spark-submit", "--master", "spark://spark-master:7077", "/opt/spark-apps/spark_job.py"]
-          env:
-            - name: INFLUXDB_URL
-              value: "http://influxdb:8086"
-            - name: INFLUXDB_DATABASE
-              value: "{{ .Values.influxdb.database }}"
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "{{ .Values.kafka.bootstrapServers }}"
+      - name: spark-job
+        image: {{ .Values.sparkJob.image.repository }}:{{ .Values.sparkJob.image.tag }}
+        env:
+        - name: KAFKA_BROKER
+          value: {{ .Values.sparkJob.kafka.broker }}
+        - name: KAFKA_TOPIC
+          value: {{ .Values.sparkJob.kafka.topic }}
+        - name: INFLUXDB_HOST
+          value: {{ .Values.sparkJob.influxdb.host }}
+        - name: INFLUXDB_PORT
+          value: "{{ .Values.sparkJob.influxdb.port }}"
+        - name: INFLUXDB_DATABASE
+          value: {{ .Values.sparkJob.influxdb.database }}

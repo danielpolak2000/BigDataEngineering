@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-collector
+  labels:
+    app: crypto-tracker
+    component: data-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crypto-tracker
+      component: data-collector
+  template:
+    metadata:
+      labels:
+        app: crypto-tracker
+        component: data-collector
+    spec:
+      containers:
+      - name: data-collector
+        image: {{ .Values.dataCollector.image.repository }}:{{ .Values.dataCollector.image.tag }}
+        env:
+        - name: KAFKA_BROKER
+          value: {{ .Values.dataCollector.kafka.broker }}
+        - name: KAFKA_TOPIC
+          value: {{ .Values.dataCollector.kafka.topic }}

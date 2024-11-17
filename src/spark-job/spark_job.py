@@ -1,42 +1,75 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
-from pyspark.sql.types import StructType, StructField, FloatType, LongType
-import influxdb_client
+from pyspark.sql.types import StructType, StructField, StringType, FloatType, IntegerType
+from influxdb import InfluxDBClient
+import os
 
-# Kafka und InfluxDB Konfiguration
-kafka_bootstrap_servers = "my-kafka-cluster-kafka-bootstrap.kafka:9092"
-influxdb_url = "http://influxdb:8086"
-database = "bitcoin_trading"
+# Kafka Configuration
+KAFKA_BROKER = os.environ.get("KAFKA_BROKER", "kafka-cluster-kafka-bootstrap.kafka:9092")
+KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC", "crypto-data")
 
-# Spark-Session
-spark = SparkSession.builder.appName("BitcoinTradingBot").getOrCreate()
+# InfluxDB Configuration
+INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "influxdb")
+INFLUXDB_PORT = os.environ.get("INFLUXDB_PORT", 8086)
+INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "crypto_data")
 
-# Kafka-Datenquelle und Schema
+# Define the schema for the incoming Kafka messages
 schema = StructType([
-    StructField("price", FloatType()),
-    StructField("timestamp", LongType())
+    StructField("currency", StringType(), True),
+    StructField("price", FloatType(), True),
+    StructField("volume", IntegerType(), True)
 ])
 
-df = spark.readStream.format("kafka") \
-    .option("kafka.bootstrap.servers", kafka_bootstrap_servers) \
-    .option("subscribe", "bitcoin-kursdaten") \
-    .load()
+def write_to_influxdb(batch_df, batch_id):
+    """
+    Function to write Spark DataFrame to InfluxDB
+    """
+    influxdb_client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT)
+    influxdb_client.switch_database(INFLUXDB_DATABASE)
 
-data_df = df.select(from_json(col("value").cast("string"), schema).alias("data")).select("data.*")
-
-# Schreiben in InfluxDB
-def write_to_influxdb(df, epoch_id):
-    client = influxdb_client.InfluxDBClient(url=influxdb_url, token="my-token", org="my-org")
-    write_api = client.write_api(write_options=influxdb_client.client.write_api.SYNCHRONOUS)
-    points = [
-        {
-            "measurement": "bitcoin_price",
-            "tags": {},
-            "fields": {"price": row.price},
+    points = []
+    for row in batch_df.collect():
+        point = {
+            "measurement": "crypto_data",
+            "tags": {
+                "currency": row.currency
+            },
+            "fields": {
+                "price": row.price,
+                "volume": row.volume
+            },
             "time": row.timestamp
         }
-        for row in df.collect()
-    ]
-    write_api.write(bucket=database, record=points)
+        points.append(point)
 
-data_df.writeStream.foreachBatch(write_to_influxdb).start().awaitTermination()
+    if points:
+        influxdb_client.write_points(points)
+        print(f"Written {len(points)} points to InfluxDB.")
+
+# Spark Session
+spark = SparkSession \
+    .builder \
+    .appName("CryptoSparkJob") \
+    .master("local[*]") \
+    .getOrCreate()
+
+# Read data from Kafka
+crypto_stream = spark \
+    .readStream \
+    .format("kafka") \
+    .option("kafka.bootstrap.servers", KAFKA_BROKER) \
+    .option("subscribe", KAFKA_TOPIC) \
+    .load()
+
+# Decode Kafka message value as JSON
+crypto_data = crypto_stream \
+    .select(from_json(col("value").cast("string"), schema).alias("data")) \
+    .select("data.*")
+
+# Write processed data to InfluxDB
+query = crypto_data.writeStream \
+    .foreachBatch(write_to_influxdb) \
+    .outputMode("update") \
+    .start()
+
+query.awaitTermination()
