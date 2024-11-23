@@ -45,6 +45,13 @@ spark-operator:
       broker: kafka-cluster-kafka-bootstrap:9092
       topic: crypto-data
 
-# InfluxDB configuration
-influxdb:
-  enabled: false
+# InfluxDB v2 configuration
+influxdb2:
+  enabled: true
+  adminUser:
+    organization: "crypto-tracker-org"
+    bucket: "crypto-tracker-bucket"
+    user: "admin"
+    retention_policy: "0s"
+    password: "admin-password"
+    token: "secret-token"
