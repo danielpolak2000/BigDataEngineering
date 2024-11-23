@@ -1,0 +1,3 @@
+*.lock
+charts/crypto-tracker/charts/*
+.venv

@@ -1,0 +1,42 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: {{ index .Values "spark-operator" "name" }}
+  namespace: {{ index .Values "global" "namespace" }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "2"
+spec:
+  type: Python
+  mode: cluster
+  image: {{ index .Values "spark-operator" "config" "image" }}
+  imagePullPolicy: Never
+  mainApplicationFile: "{{ index .Values "spark-operator" "config" "mainApplicationFile" }}"
+  restartPolicy:
+    type: OnFailure
+    onFailureRetries: 3
+    onFailureRetryInterval: 5
+  deps:
+    jars:
+      - local:///opt/spark/jars/spark-sql-kafka-0-10_2.12-3.5.3.jar
+      - local:///opt/spark/jars/spark-token-provider-kafka-0-10_2.12-3.5.3.jar
+      - local:///opt/spark/jars/kafka-clients-3.5.2.jar
+      - local:///opt/spark/jars/commons-pool2-2.11.1.jar
+  driver:
+    cores: {{ index .Values "spark-operator" "config" "driver" "cores" }}
+    memory: {{ index .Values "spark-operator" "config" "driver" "memory" }}
+    serviceAccount: {{ index .Values "spark-operator" "config" "driver" "serviceAccount" }}
+    env:
+      - name: KAFKA_BROKER
+        value: {{ index .Values "spark-operator" "config" "kafka" "broker" }}
+      - name: KAFKA_TOPIC
+        value: {{ index .Values "spark-operator" "config" "kafka" "topic" }}
+  executor:
+    instances: {{ index .Values "spark-operator" "config" "executor" "instances" }}
+    cores: {{ index .Values "spark-operator" "config" "executor" "cores" }}
+    memory: {{ index .Values "spark-operator" "config" "executor" "memory" }}
+    env:
+      - name: KAFKA_BROKER
+        value: {{ index .Values "spark-operator" "config" "kafka" "broker" }}
+      - name: KAFKA_TOPIC
+        value: {{ index .Values "spark-operator" "config" "kafka" "topic" }}
