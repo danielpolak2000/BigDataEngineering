@@ -24,6 +24,14 @@ else
     fi
 fi
 
+echo -e "${INFO_COLOR}info | Updating Helm dependencies for chart '${CHART_PATH}'...${NC}"
+if helm dependency update "${CHART_PATH}"; then
+    echo -e "${INFO_COLOR}info | > Helm dependencies updated successfully.${NC}"
+else
+    echo -e "${ERROR_COLOR}error | > Failed to update Helm dependencies for chart '${CHART_PATH}'.${NC}"
+    exit 1
+fi
+
 echo -e "${INFO_COLOR}info | Installing Helm chart '${RELEASE_NAME}' from '${CHART_PATH}'...${NC}"
 if helm install "${RELEASE_NAME}" "${CHART_PATH}" --namespace "${NAMESPACE}" --create-namespace; then
     echo -e "${INFO_COLOR}info | > Helm chart '${RELEASE_NAME}' installed successfully.${NC}"
