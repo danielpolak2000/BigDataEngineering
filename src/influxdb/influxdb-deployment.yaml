@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+  labels:
+    app: influxdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      containers:
+        - name: influxdb
+          image: influxdb:2.2.0
+          ports:
+            - containerPort: 8086
+          env:
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: "setup"
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              value: "admin" # Admin-Benutzername
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              value: "adminpass" # Admin-Passwort
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: "marketdata-org"
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: "marketdata" # Bucket für Markt-Daten
+          volumeMounts:
+            - name: influxdb-storage
+              mountPath: /var/lib/influxdb2 # musst vielleicht anpassen bei windows. Hab ich keine Ahnung :D
+      volumes:
+        - name: influxdb-storage
+          persistentVolumeClaim:
+            claimName: influxdb-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influxdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi # Speichergröße für InfluxDB-Daten
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb
+  labels:
+    app: influxdb
+spec:
+  selector:
+    app: influxdb
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086

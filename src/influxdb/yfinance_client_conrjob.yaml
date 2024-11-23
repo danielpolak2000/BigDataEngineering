@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: yfinance-client
+spec:
+  schedule: "*/1 * * * *" # Führt den Job jede Minute aus
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: yfinance-client
+              image: your-registry/yfinance-client:latest # Docker-Image für das Skript
+              imagePullPolicy: IfNotPresent
+          restartPolicy: Never
