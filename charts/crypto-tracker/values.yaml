@@ -1,101 +1,50 @@
-# Default values for the crypto-tracker Helm chart
-
-# Global configurations
 global:
-  imagePullPolicy: IfNotPresent
+  namespace: crypto-tracker
 
 # Kafka configuration
-kafka:
+strimzi-kafka-operator:
+  enabled: true
+  name: kafka-cluster
   replicas: 1
   config:
-    broker:
-      config:
-        auto.create.topics.enable: "true"
+    kafkaVersion: 3.8.0
     zookeeper:
+      replicas: 3
+  topic:
+    name: crypto-data
+    config:
+      partitions: 1
       replicas: 1
 
 # Spark configuration
-spark:
-  worker:
+spark-operator:
+  enabled: true
+  name: spark-app
+  spark:
+    jobNamespaces:
+      - crypto-tracker
+  controller:
     replicas: 1
-  job:
-    image:
-      repository: crypto-tracker-spark-job
-      tag: latest
-    mainApplicationFile: local:///opt/spark-job/spark_job.py
+    workers: 5
+  sparkUIOptions:
+    ingressAnnotations:
+        kubernetes.io/ingress.class: nginx
+  config:
+    sparkVersion: 3.5.3
+    image: crypto-tracker/spark-py:latest
+    mainApplicationFile: local:///opt/spark/work-dir/spark_app.py
+    driver:
+      cores: 1
+      memory: 512m
+      serviceAccount: crypto-tracker-spark-operator-spark
+    executor:
+      instances: 2
+      cores: 1
+      memory: 512m
+    kafka:
+      broker: kafka-cluster-kafka-bootstrap:9092
+      topic: crypto-data
 
 # InfluxDB configuration
 influxdb:
-  persistence:
-    enabled: true
-    size: 1Gi
-  config:
-    http:
-      auth-enabled: false
-  database: crypto_data
-
-# Data collector app configuration
-dataCollector:
-  image:
-    repository: crypto-tracker-data-collector
-    tag: latest
-  replicaCount: 1
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "500m"
-    limits:
-      memory: "512Mi"
-      cpu: "1"
-  kafka:
-    broker: kafka-cluster-kafka-bootstrap.kafka:9092
-    topic: crypto-data
-
-# Spark job configuration
-sparkJob:
-  image:
-    repository: crypto-tracker-spark-job
-    tag: latest
-  replicaCount: 1
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "500m"
-    limits:
-      memory: "512Mi"
-      cpu: "1"
-  kafka:
-    broker: kafka-cluster-kafka-bootstrap.kafka:9092
-    topic: crypto-data
-  influxdb:
-    host: influxdb
-    port: 8086
-    database: crypto_data
-
-# Dashboard app configuration
-dashboard:
-  image:
-    repository: crypto-tracker-dashboard
-    tag: latest
-  replicaCount: 1
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "500m"
-    limits:
-      memory: "512Mi"
-      cpu: "1"
-  influxdb:
-    host: influxdb
-    port: 8086
-    database: crypto_data
-  service:
-    type: ClusterIP
-    port: 5000
-  ingress:
-    enabled: true
-    host: crypto-tracker.local
-
-# Network policy configurations (optional)
-networkPolicy:
   enabled: false

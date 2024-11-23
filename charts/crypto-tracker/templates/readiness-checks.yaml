@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: readiness-check
+  namespace: crypto-tracker
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: readiness-check
+          image: curlimages/curl:latest
+          command:
+            - "sh"
+            - "-c"
+            - |
+              until nc -z crypto-tracker-spark-operator-webhook-svc.crypto-tracker.svc 9443; do
+                echo "Waiting for Spark webhook service...";
+                sleep 3;
+              done;
+              until nc -z kafka-cluster-kafka-bootstrap.crypto-tracker.svc 9092; do
+                echo "Waiting for Kafka cluster...";
+                sleep 3;
+              done;
+              echo "All services are ready.";

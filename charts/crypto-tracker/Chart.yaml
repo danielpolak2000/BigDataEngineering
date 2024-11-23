@@ -1,16 +1,17 @@
 apiVersion: v2
 name: crypto-tracker
 description: A Helm chart for deploying a crypto tracking application on Kubernetes with Kafka, Spark, and InfluxDB
+type: application
 version: 0.1.0
-appVersion: "1.0"
+appVersion: "1.0.0"
 
 dependencies:
-  - name: kafka
-    version: 30.1.7
-    repository: https://charts.bitnami.com/bitnami
-  - name: spark
-    version: 9.2.12
-    repository: https://charts.bitnami.com/bitnami
-  - name: influxdb
-    version: 6.3.21
-    repository: https://charts.bitnami.com/bitnami
+  - name: strimzi-kafka-operator
+    version: 0.44.0
+    repository: https://strimzi.io/charts
+  - name: spark-operator
+    version: 2.0.2
+    repository: https://kubeflow.github.io/spark-operator
+  - name: influxdb2
+    version: 2.1.2
+    repository: https://helm.influxdata.com
