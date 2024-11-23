@@ -10,7 +10,7 @@ echo -e "${INFO_COLOR}info | Starting uninstallation of the Helm chart 'crypto-t
 NAMESPACE="crypto-tracker"
 RELEASE_NAME="crypto-tracker"
 PVC_NAME="crypto-tracker-influxdb2"
-SPARK_APP_DEPLOYMENT="charts/crypto-tracker/templates/spark-app-deployment.yaml"
+SPARK_APP_DEPLOYMENT="./charts/crypto-tracker/templates/spark-app-deployment.yaml"
 
 echo -e "${INFO_COLOR}info | Uninstalling Helm release '${RELEASE_NAME}' from namespace '${NAMESPACE}'...${NC}"
 if helm uninstall "${RELEASE_NAME}" --namespace "${NAMESPACE}"; then
@@ -23,11 +23,12 @@ fi
 echo -e "${INFO_COLOR}info | Pausing for 5 seconds to allow resources to clean up...${NC}"
 sleep 5
 
-echo -e "${INFO_COLOR}info | Deleting Spark app deployment resource from '${SPARK_APP_DEPLOYMENT}'...${NC}"
-if kubectl delete -f "${SPARK_APP_DEPLOYMENT}"; then
-    echo -e "${INFO_COLOR}info | > Spark app deployment deleted successfully.${NC}"
+# Clean up any remaining Spark pods or services
+echo -e "${INFO_COLOR}info | Cleaning up remaining resources in namespace '${NAMESPACE}'...${NC}"
+if kubectl delete --all pods,svc -n "${NAMESPACE}" --ignore-not-found; then
+    echo -e "${INFO_COLOR}info | > Remaining resources cleaned up successfully.${NC}"
 else
-    echo -e "${ERROR_COLOR}error | > Failed to delete Spark app deployment from '${SPARK_APP_DEPLOYMENT}'.Proceeding. ${NC}"
+    echo -e "${ERROR_COLOR}error | > Failed to clean up resources. Proceeding.${NC}"
     # Don't exit here, as we can still proceed
 fi
 
@@ -35,7 +36,7 @@ echo -e "${INFO_COLOR}info | Pausing for 5 seconds to allow PVC cleanup..."
 sleep 5
 
 echo -e "${INFO_COLOR}info | Deleting PersistentVolumeClaim '${PVC_NAME}' in namespace '${NAMESPACE}'...${NC}"
-if kubectl delete pvc "${PVC_NAME}" -n "${NAMESPACE}"; then
+if kubectl delete pvc "${PVC_NAME}" -n "${NAMESPACE}" --ignore-not-found; then
     echo -e "${INFO_COLOR}info | > PersistentVolumeClaim '${PVC_NAME}' deleted successfully.${NC}"
 else
     echo -e "${ERROR_COLOR}error | > Failed to delete PersistentVolumeClaim '${PVC_NAME}'. Proceeding.${NC}"
