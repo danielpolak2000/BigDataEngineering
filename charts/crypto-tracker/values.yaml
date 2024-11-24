@@ -42,16 +42,27 @@ spark-operator:
       cores: 1
       memory: 512m
     kafka:
-      broker: kafka-cluster-kafka-bootstrap:9092
+      broker: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
       topic: crypto-data
+    influxdb:
+      host: http://crypto-tracker-influxdb2.crypto-tracker.svc:8086
+      organization: crypto-tracker-org
+      bucket: crypto-tracker-bucket
+      token: secret-token
 
 # InfluxDB v2 configuration
 influxdb2:
   enabled: true
+  service:
+    port: 8086
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    path: /
   adminUser:
-    organization: "crypto-tracker-org"
-    bucket: "crypto-tracker-bucket"
-    user: "admin"
+    organization: crypto-tracker-org
+    bucket: crypto-tracker-bucket
+    user: admin
     retention_policy: "0s"
-    password: "admin-password"
-    token: "secret-token"
+    password: admin-password
+    token: secret-token
