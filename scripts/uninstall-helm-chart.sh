@@ -25,7 +25,7 @@ sleep 5
 
 # Clean up any remaining Spark pods or services
 echo -e "${INFO_COLOR}info | Cleaning up remaining resources in namespace '${NAMESPACE}'...${NC}"
-if kubectl delete --all pods,svc -n "${NAMESPACE}" --ignore-not-found; then
+if kubectl delete all --all -n "${NAMESPACE}" --ignore-not-found; then
     echo -e "${INFO_COLOR}info | > Remaining resources cleaned up successfully.${NC}"
 else
     echo -e "${ERROR_COLOR}error | > Failed to clean up resources. Proceeding.${NC}"

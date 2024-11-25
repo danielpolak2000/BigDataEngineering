@@ -11,7 +11,7 @@ strimzi-kafka-operator:
     zookeeper:
       replicas: 3
   topic:
-    name: crypto-data
+    name: cryptodata
     config:
       partitions: 1
       replicas: 1
@@ -43,12 +43,11 @@ spark-operator:
       memory: 512m
     kafka:
       broker: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
-      topic: crypto-data
+      topic: cryptodata
     influxdb:
       host: http://crypto-tracker-influxdb2.crypto-tracker.svc:8086
       organization: crypto-tracker-org
       bucket: crypto-tracker-bucket
-      token: secret-token
 
 # InfluxDB v2 configuration
 influxdb2:
@@ -64,5 +63,4 @@ influxdb2:
     bucket: crypto-tracker-bucket
     user: admin
     retention_policy: "0s"
-    password: admin-password
-    token: secret-token
+    existingSecret: influxdb-auth
