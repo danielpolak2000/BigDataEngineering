@@ -38,7 +38,10 @@ spec:
       - name: INFLUXDB_BUCKET
         value: {{ index .Values "spark-operator" "config" "influxdb" "bucket" }}
       - name: INFLUXDB_TOKEN
-        value: {{ index .Values "spark-operator" "config" "influxdb" "token" }}
+        valueFrom:
+          secretKeyRef:
+            name: influxdb-auth
+            key: admin-token
   executor:
     instances: {{ index .Values "spark-operator" "config" "executor" "instances" }}
     cores: {{ index .Values "spark-operator" "config" "executor" "cores" }}
@@ -55,4 +58,7 @@ spec:
       - name: INFLUXDB_BUCKET
         value: {{ index .Values "spark-operator" "config" "influxdb" "bucket" }}
       - name: INFLUXDB_TOKEN
-        value: {{ index .Values "spark-operator" "config" "influxdb" "token" }}
+        valueFrom:
+          secretKeyRef:
+            name: influxdb-auth
+            key: admin-token
