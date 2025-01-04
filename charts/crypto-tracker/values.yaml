@@ -1,0 +1,66 @@
+global:
+  namespace: crypto-tracker
+
+# Kafka configuration
+strimzi-kafka-operator:
+  enabled: true
+  name: kafka-cluster
+  replicas: 1
+  config:
+    kafkaVersion: 3.8.0
+    zookeeper:
+      replicas: 3
+  topic:
+    name: cryptodata
+    config:
+      partitions: 1
+      replicas: 1
+
+# Spark configuration
+spark-operator:
+  enabled: true
+  name: spark-app
+  spark:
+    jobNamespaces:
+      - crypto-tracker
+  controller:
+    replicas: 1
+    workers: 5
+  sparkUIOptions:
+    ingressAnnotations:
+        kubernetes.io/ingress.class: nginx
+  config:
+    sparkVersion: 3.5.3
+    image: crypto-tracker/spark-py:latest
+    mainApplicationFile: local:///opt/spark/work-dir/spark_app.py
+    driver:
+      cores: 1
+      memory: 512m
+      serviceAccount: crypto-tracker-spark-operator-spark
+    executor:
+      instances: 2
+      cores: 1
+      memory: 512m
+    kafka:
+      broker: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
+      topic: cryptodata
+    influxdb:
+      host: http://crypto-tracker-influxdb2.crypto-tracker.svc:8086
+      organization: crypto-tracker-org
+      bucket: crypto-tracker-bucket
+
+# InfluxDB v2 configuration
+influxdb2:
+  enabled: true
+  service:
+    port: 8086
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    path: /
+  adminUser:
+    organization: crypto-tracker-org
+    bucket: crypto-tracker-bucket
+    user: admin
+    retention_policy: "0s"
+    existingSecret: influxdb-auth

@@ -1,0 +1,13 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: {{ index .Values "strimzi-kafka-operator" "topic" "name" }}
+  namespace: crypto-tracker
+  labels:
+    strimzi.io/cluster: {{ index .Values "strimzi-kafka-operator" "name" }}
+spec:
+  partitions: {{ index .Values "strimzi-kafka-operator" "topic" "config" "partitions" }}
+  replicas: {{ index .Values "strimzi-kafka-operator" "topic" "config" "replicas" }}
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824

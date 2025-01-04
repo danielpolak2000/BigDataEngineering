@@ -1,0 +1,1 @@
+## To build the Docker image of the Spark app, please use this script `scripts/build-spark-image.sh`.
