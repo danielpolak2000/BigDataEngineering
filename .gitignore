@@ -1,3 +1,5 @@
+.DS_Store
+src/.DS_Store
 *.lock
 charts/crypto-tracker/charts/*
 .venv
