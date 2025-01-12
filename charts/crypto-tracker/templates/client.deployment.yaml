@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crypto-data-client
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.client.replicas }}
+  selector:
+    matchLabels:
+      app: crypto-data-client
+  template:
+    metadata:
+      labels:
+        app: crypto-data-client
+    spec:
+      containers:
+        - name: crypto-data-client
+          image: {{ .Values.client.image }}
+          imagePullPolicy: {{ .Values.client.imagePullPolicy }}
+          env:
+            - name: KAFKA_BROKER
+              value: {{ .Values.client.kafka.broker }}
+            - name: KAFKA_TOPIC
+              value: {{ .Values.client.kafka.topic }}
+            - name: INFLUXDB_URL
+              value: {{ .Values.client.env[2].value }}
+            - name: INFLUXDB_ORG
+              value: {{ .Values.client.env[3].value }}
+            - name: INFLUXDB_BUCKET
+              value: {{ .Values.client.env[4].value }}
+            - name: INFLUXDB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-auth
+                  key: admin-token
+      restartPolicy: Always

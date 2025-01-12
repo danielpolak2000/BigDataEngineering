@@ -64,3 +64,24 @@ influxdb2:
     user: admin
     retention_policy: "0s"
     existingSecret: influxdb-auth
+
+client:
+  enabled: true
+  name: crypto-data-client
+  image: dein-dockerhub/crypto-client:latest  # TODO
+  imagePullPolicy: IfNotPresent
+  replicas: 1
+  kafka:
+    broker: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
+    topic: cryptodata
+  env:
+    - name: KAFKA_BROKER
+      value: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
+    - name: KAFKA_TOPIC
+      value: cryptodata
+    - name: INFLUXDB_URL
+      value: http://crypto-tracker-influxdb2.crypto-tracker.svc:8086
+    - name: INFLUXDB_ORG
+      value: crypto-tracker-org
+    - name: INFLUXDB_BUCKET
+      value: crypto-tracker-bucket
