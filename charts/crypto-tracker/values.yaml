@@ -85,3 +85,16 @@ client:
       value: crypto-tracker-org
     - name: INFLUXDB_BUCKET
       value: crypto-tracker-bucket
+
+streamlit:
+  enabled: true
+  name: streamlit-dashboard
+  image: dein-dockerhub/streamlit-dashboard:latest  # TODO
+  imagePullPolicy: IfNotPresent
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 5000
+  ingress:
+    enabled: false
+    host: streamlit.local
