@@ -1,0 +1,43 @@
+global:
+  namespace: crypto-tracker
+
+# Docker-Images
+importer:
+  enabled: true
+  image: "dein-dockerhub/crypto-importer:latest"
+  imagePullPolicy: IfNotPresent
+  kafkaBroker: "kafka-cluster-kafka-bootstrap:9092"
+  kafkaTopic: "crypto-data"
+  influxdbUrl: "http://crypto-tracker-influxdb2:8086"
+  influxdbOrg: "crypto-tracker-org"
+  influxdbBucket: "crypto-tracker-bucket"
+  influxdbTokenSecret: "influxdb-auth"
+
+client:
+  enabled: true
+  image: "dein-dockerhub/crypto-client:latest"
+  imagePullPolicy: IfNotPresent
+  kafkaBroker: "kafka-cluster-kafka-bootstrap:9092"
+  kafkaTopic: "crypto-data"
+
+# Kafka Topic-Konfiguration
+strimzi-kafka-operator:
+  enabled: true
+  name: kafka-cluster
+  replicas: 1
+  topic:
+    name: crypto-data
+    partitions: 3
+    replicas: 1
+
+# InfluxDB-Konfiguration
+influxdb2:
+  enabled: true
+  service:
+    port: 8086
+  adminUser:
+    organization: crypto-tracker-org
+    bucket: crypto-tracker-bucket
+    user: admin
+    retention_policy: "0s"
+    existingSecret: influxdb-auth
