@@ -1,19 +1,19 @@
-# Use Python base image
+# Basis-Image mit Python 3.9
 FROM python:3.9-slim
 
-# Set working directory
+# Arbeitsverzeichnis setzen
 WORKDIR /app
 
-# Copy requirements file and install dependencies
+# Abhängigkeiten installieren
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Anwendungscode kopieren
 COPY app.py .
 COPY templates/ ./templates/
 
-# Expose the application port
+# Port 5000 freigeben
 EXPOSE 5000
 
-# Run the application
-ENTRYPOINT ["python", "app.py"]
+# Streamlit-App auf Port 5000 starten
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=5000", "--server.address=0.0.0.0"]

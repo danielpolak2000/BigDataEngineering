@@ -1,2 +1,4 @@
-flask
-influxdb
+influxdb-client
+streamlit
+streamlit-autorefresh
+pandas
