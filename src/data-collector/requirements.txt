@@ -1,3 +1,6 @@
 pandas
 requests
 kafka-python
+yfinance 
+influxdb-client 
+kaggle
