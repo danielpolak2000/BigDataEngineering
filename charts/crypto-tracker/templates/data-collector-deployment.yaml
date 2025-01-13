@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: {{ index .Values "data-collector" "name" }}
   namespace: {{ index .Values "global" "namespace" }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "3"
 spec:
   replicas: {{ index .Values "data-collector" "replicas" }}
   selector:

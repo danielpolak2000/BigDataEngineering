@@ -8,6 +8,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN apt update && apt install -y unzip
+
 # Kaggle API Key kopieren
 COPY kaggle.json /root/.kaggle/kaggle.json
 RUN chmod 600 /root/.kaggle/kaggle.json

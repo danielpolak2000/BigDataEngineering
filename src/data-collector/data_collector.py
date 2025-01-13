@@ -49,7 +49,7 @@ def is_bucket_empty():
 
 
 def import_csv():
-    csv_file = "bitcoin-historical-data.csv"
+    csv_file = "/app/bitcoin-historical-data.csv"
     data = pd.read_csv(csv_file)
 
     # Timestamps konvertieren
