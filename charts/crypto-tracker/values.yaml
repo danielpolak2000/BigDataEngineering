@@ -65,33 +65,30 @@ influxdb2:
     retention_policy: "0s"
     existingSecret: influxdb-auth
 
-client:
+data-collector:
   enabled: true
-  name: crypto-data-client
-  image: dein-dockerhub/crypto-client:latest  # TODO
-  imagePullPolicy: IfNotPresent
+  name: crypto-data-collector
+  image: crypto-tracker/data-collector:latest  # TODO
   replicas: 1
-  kafka:
-    broker: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
-    topic: cryptodata
-  env:
-    - name: KAFKA_BROKER
-      value: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
-    - name: KAFKA_TOPIC
-      value: cryptodata
-    - name: INFLUXDB_URL
-      value: http://crypto-tracker-influxdb2.crypto-tracker.svc:8086
-    - name: INFLUXDB_ORG
-      value: crypto-tracker-org
-    - name: INFLUXDB_BUCKET
-      value: crypto-tracker-bucket
+  config:
+    kafka:
+      broker: kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092
+      topic: cryptodata
+    influxdb:
+      url: http://crypto-tracker-influxdb2.crypto-tracker.svc:8086
+      org: crypto-tracker-org
+      bucket: crypto-tracker-bucket
 
-streamlit:
+dashboard:
   enabled: true
-  name: streamlit-dashboard
-  image: dein-dockerhub/streamlit-dashboard:latest  # TODO
-  imagePullPolicy: IfNotPresent
+  name: crypto-tracker-dashboard
+  image: crypto-tracker/dashboard:latest  # TODO
   replicas: 1
+  config:
+    influxdb:
+      url: http://crypto-tracker-influxdb2.crypto-tracker.svc:8086
+      org: crypto-tracker-org
+      bucket: crypto-tracker-bucket
   service:
     type: ClusterIP
     port: 5000

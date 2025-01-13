@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ index .Values "dashboard" "name" }}
+  namespace: {{ index .Values "global" "namespace" }}
+spec:
+  replicas: {{ index .Values "dashboard" "replicas" }}
+  selector:
+    matchLabels:
+      app: {{ index .Values "dashboard" "name" }}
+  template:
+    metadata:
+      labels:
+        app: {{ index .Values "dashboard" "name" }}
+    spec:
+      containers:
+        - name: {{ index .Values "dashboard" "name" }}
+          image: {{ index .Values "dashboard" "image" }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: INFLUXDB_URL
+              value: {{ index .Values "dashboard" "config" "influxdb" "url" }}
+            - name: INFLUXDB_ORG
+              value: {{ index .Values "dashboard" "config" "influxdb" "org" }}
+            - name: INFLUXDB_BUCKET
+              value: {{ index .Values "dashboard" "config" "influxdb" "bucket" }}
+            - name: INFLUXDB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-auth
+                  key: admin-token

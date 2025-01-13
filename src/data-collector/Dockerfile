@@ -26,4 +26,4 @@ COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
 # Set the entry point for the container
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

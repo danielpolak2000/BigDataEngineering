@@ -10,7 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Anwendungscode kopieren
 COPY app.py .
-COPY templates/ ./templates/
 
 # Port 5000 freigeben
 EXPOSE 5000
