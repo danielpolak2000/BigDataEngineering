@@ -14,7 +14,7 @@ INFLUXDB_BUCKET = os.environ.get("INFLUXDB_BUCKET", "crypto-tracker-bucket")
 
 # Kafka Konfiguration
 KAFKA_BROKER = os.environ.get(
-    "KAFKA_BROKER", "kafka-cluster-kafka-bootstrap.kafka:9092")
+    "KAFKA_BROKER", "kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC", "crypto-data")
 
 # InfluxDB-Client initialisieren
@@ -49,7 +49,7 @@ def is_bucket_empty():
 
 
 def import_csv():
-    csv_file = "/app/bitcoin-historical-data.csv"
+    csv_file = "btcusd_1-min_data.csv"
     data = pd.read_csv(csv_file)
 
     # Timestamps konvertieren
@@ -61,7 +61,7 @@ def import_csv():
     for index, row in data.iterrows():
         record = {
             "timestamp": index.isoformat(),
-            "coin": "BTC",
+            "coin": "BTC-USD",
             "open": row["Open"],
             "high": row["High"],
             "low": row["Low"],

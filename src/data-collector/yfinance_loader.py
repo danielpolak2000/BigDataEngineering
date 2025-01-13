@@ -8,7 +8,7 @@ import os
 
 # Kafka-Konfiguration
 KAFKA_BROKER = os.environ.get(
-    "KAFKA_BROKER", "kafka-cluster-kafka-bootstrap:9092")
+    "KAFKA_BROKER", "kafka-cluster-kafka-bootstrap.crypto-tracker.svc:9092")
 KAFKA_TOPIC = os.environ.get("KAFKA_TOPIC", "crypto-data")
 
 # Kafka Producer initialisieren
@@ -29,8 +29,6 @@ influx_client = InfluxDBClient(
     url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = influx_client.query_api()
 
-# Symbol und Zeitauflösung für Yahoo Finance
-symbol = "Bitcoin"
 interval = "1m"  # 1-Minuten-Auflösung
 
 # Funktion zum Abrufen des neuesten Timestamps
@@ -72,7 +70,7 @@ while start_date < end_date:
 
     try:
         # Daten von Yahoo Finance laden
-        data = yf.download(symbol, start=start_date,
+        data = yf.download("BTC-USD", start=start_date,
                            end=next_end_date, interval=interval)
 
         if data.empty:
@@ -83,13 +81,12 @@ while start_date < end_date:
             for index, row in data.iterrows():
                 record = {
                     "timestamp": index.isoformat(),
-                    "symbol": symbol,
+                    "coin": "BTC-USD",
                     "open": row["Open"],
                     "high": row["High"],
                     "low": row["Low"],
                     "close": row["Close"],
-                    "volume": row["Volume"],
-                    "source": "yahoo_finance"
+                    "volume": row["Volume"]
                 }
                 try:
                     producer.send(KAFKA_TOPIC, value=record)

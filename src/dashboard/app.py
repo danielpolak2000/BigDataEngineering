@@ -2,9 +2,10 @@ import pandas as pd
 from influxdb_client import InfluxDBClient
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
+import os
 
 # InfluxDB 2.x Konfiguration
-INFLUXDB_URL = os.environ.get("INFLUXDB_HOST", "influxdb")
+INFLUXDB_URL = os.environ.get("INFLUXDB_URL", "http://crypto-tracker-influxdb2.crypto-tracker.svc:8086")
 INFLUXDB_TOKEN = os.environ.get("INFLUXDB_TOKEN")
 INFLUXDB_ORG = os.environ.get("INFLUXDB_ORG", "organization")
 INFLUXDB_BUCKET = os.environ.get("INFLUXDB_BUCKET", "bucket")
@@ -14,11 +15,11 @@ influxdb_client = InfluxDBClient(
     url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = influxdb_client.query_api()
 
-# Auto-Refresh alle 10 Sekunden
-st_autorefresh(interval=10000, key="data_refresh")
-
 # Streamlit-Seite konfigurieren
 st.set_page_config(page_title="InfluxDB Visualisierung", layout="wide")
+
+# Auto-Refresh alle 10 Sekunden
+st_autorefresh(interval=10000, key="data_refresh")
 
 # Titel und Beschreibung
 st.title("Bitcoin-Daten Visualisierung")
