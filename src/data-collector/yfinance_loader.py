@@ -3,6 +3,7 @@ import yfinance as yf
 from kafka import KafkaProducer
 import json
 from datetime import datetime, timedelta, timezone
+from influxdb_client import InfluxDBClient
 import os
 
 # Kafka-Konfiguration
@@ -16,6 +17,18 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
+# InfluxDB Konfiguration
+INFLUXDB_URL = os.environ.get(
+    "INFLUXDB_URL", "http://crypto-tracker-influxdb2.crypto-tracker.svc:8086")
+INFLUXDB_TOKEN = os.environ.get("INFLUXDB_TOKEN")
+INFLUXDB_ORG = os.environ.get("INFLUXDB_ORG", "crypto-tracker-org")
+INFLUXDB_BUCKET = os.environ.get("INFLUXDB_BUCKET", "crypto-tracker-bucket")
+
+# InfluxDB-Client initialisieren
+influx_client = InfluxDBClient(
+    url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
+query_api = influx_client.query_api()
+
 # Symbol und Zeitauflösung für Yahoo Finance
 symbol = "Bitcoin"
 interval = "1m"  # 1-Minuten-Auflösung
@@ -24,10 +37,26 @@ interval = "1m"  # 1-Minuten-Auflösung
 
 
 def get_latest_timestamp():
-    # Placeholder: Hier sollte der letzte Timestamp aus InfluxDB oder Kafka kommen
-    # Für jetzt setzen wir einen Standardzeitpunkt:
-    print("⚠️ Keine Datenquelle für Timestamp. Starte mit Daten von vor 1 Tag.")
-    return datetime.now(timezone.utc) - timedelta(days=1)
+    try:
+        query = f'''
+        from(bucket: "{INFLUXDB_BUCKET}")
+          |> range(start: -30d)
+          |> filter(fn: (r) => r._measurement == "market_data")
+          |> filter(fn: (r) => r._field == "close")
+          |> sort(columns: ["_time"], desc: true)
+          |> limit(n: 1)
+        '''
+        tables = query_api.query(query)
+        if tables and tables[0].records:
+            latest_timestamp = tables[0].records[0].get_time()
+            print(f"🟢 Neuester Datenpunkt in InfluxDB: {latest_timestamp}")
+            return latest_timestamp
+        else:
+            print("⚠️ Keine Daten in InfluxDB gefunden. Starte mit Daten von vor 1 Tag.")
+            return datetime.now(timezone.utc) - timedelta(days=1)
+    except Exception as e:
+        print(f"❌ Fehler beim Abrufen des Timestamps: {e}")
+        return datetime.now(timezone.utc) - timedelta(days=1)
 
 
 # Zeitintervalle berechnen
