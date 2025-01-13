@@ -98,6 +98,15 @@ else
     exit 1
 fi
 
+# Set Docker environment for building images inside Minikube
+echo -e "${INFO_COLOR}info | Setting up Docker environment for Minikube...${NC}"
+if eval "$(minikube -p minikube docker-env)"; then
+    echo -e "${INFO_COLOR}info | > Docker environment set for Minikube.${NC}"
+else
+    echo -e "${ERROR_COLOR}error | > Failed to set Docker environment for Minikube.${NC}"
+    exit 1
+fi
+
 # Build Spark and PySpark Docker images using the copied Dockerfile
 echo -e "${INFO_COLOR}info | Building Spark and PySpark Docker images using the copied Dockerfile...${NC}"
 if ${SPARK_DIR}/bin/docker-image-tool.sh \
